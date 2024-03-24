@@ -1,0 +1,72 @@
+import os
+import re
+import tkinter as tk
+
+# 常见后缀
+video_extensions = ['.mkv', '.mp4', '.avi', '.mov', '.wmv']
+subtitle_extensions = ['.ass', '.srt', '.sub', '.ssa', '.txt']
+
+def match_episode(filename):
+    episode_pattern = re.compile(r'(\d+)')
+    match = episode_pattern.search(filename)
+    return match.group(0) if match else None
+ # 检测.sc.tc
+def detect_language_tag(filename):
+    if '.sc' in filename:
+        return '.sc'
+    elif '.tc' in filename:
+        return '.tc'
+    return ''
+
+def rename_subtitles(directory=os.getcwd()):
+    # 字幕文件重命名
+    files = os.listdir(directory)
+    videos = [f for f in files if any(f.endswith(ext) for ext in video_extensions)]
+    subtitles = [f for f in files if any(f.endswith(ext) for ext in subtitle_extensions)]
+    renamed_files = []
+
+    for subtitle in subtitles:
+        episode_number = match_episode(subtitle)
+        lang_tag = detect_language_tag(subtitle)
+        if episode_number:
+            matched_videos = [v for v in videos if episode_number in match_episode(v)]
+            if matched_videos:
+                video_name, video_ext = os.path.splitext(matched_videos[0])
+                subtitle_name, subtitle_ext = os.path.splitext(subtitle)
+                new_subtitle_name = f"{video_name}{lang_tag}{subtitle_ext}"
+                os.rename(os.path.join(directory, subtitle), os.path.join(directory, new_subtitle_name))
+                renamed_files.append((os.path.join(directory, new_subtitle_name), os.path.join(directory, subtitle)))
+    return renamed_files
+# 撤销操作，恢复文件名
+def undo_rename(renamed_files):
+    for new_name, old_name in renamed_files:
+        os.rename(new_name, old_name)
+
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Subtitle Renamer")
+        self.root.geometry("360x150")  # 窗口尺寸
+        self.renamed_files = []
+        # Rename Undo
+        self.rename_button = tk.Button(root, text="Rename", command=self.rename)
+        self.rename_button.pack(pady=10)
+        self.undo_button = tk.Button(root, text="Undo", command=self.undo, state=tk.DISABLED)
+        self.undo_button.pack(pady=10)
+
+    # 重命名后启用撤销
+    def rename(self):
+        self.renamed_files = rename_subtitles()
+        if self.renamed_files:
+            self.undo_button['state'] = tk.NORMAL
+    # 撤销&&禁用
+    def undo(self):
+        if self.renamed_files:
+            undo_rename(self.renamed_files)
+            self.renamed_files = []
+            self.undo_button['state'] = tk.DISABLED
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
