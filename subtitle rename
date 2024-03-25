@@ -10,12 +10,18 @@ def match_episode(filename):
     episode_pattern = re.compile(r'(\d+)')
     match = episode_pattern.search(filename)
     return match.group(0) if match else None
- # 检测.sc.tc
+ # 检测语言tag
 def detect_language_tag(filename):
     if '.sc' in filename:
         return '.sc'
     elif '.tc' in filename:
         return '.tc'
+    elif '.chs' in filename:
+        return '.chs'
+    elif '.cht' in filename:
+        return '.cht'
+    elif '.jpn' in filename:
+        return '.jpn'
     return ''
 
 def rename_subtitles(directory=os.getcwd()):
