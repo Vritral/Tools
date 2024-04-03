@@ -54,7 +54,7 @@ class App:
         self.root.title("Subtitle Renamer")
         self.root.geometry("360x150")  # 窗口尺寸
         self.renamed_files = []
-        # Rename Undo
+        # Undo
         self.rename_button = tk.Button(root, text="Rename", command=self.rename)
         self.rename_button.pack(pady=10)
         self.undo_button = tk.Button(root, text="Undo", command=self.undo, state=tk.DISABLED)
