@@ -9,7 +9,7 @@ def match_episode(filename):
     # 正则匹配
     episode_pattern = re.compile(
         r'\[([0-9]+v[0-9]+)\]|'        # 匹配包含版本号的分集 如[xxv2]
-	    r'\[([0-9]+)(?:v[0-9]+)?\]|'
+        r'\[([0-9]+)(?:v[0-9]+)?\]|'
         r'[Ee]pisode\s*(\d+)|'    # 匹配 "Episode xx"
         r'[Ee]p_(\d+)|'           # 匹配 "Ep_xx"
         r'[Ee](\d+)|'             # 匹配 "Exx"
