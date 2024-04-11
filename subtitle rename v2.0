@@ -1,0 +1,108 @@
+import os
+import re
+
+# 常见类型
+video_extensions = ['.mkv', '.mp4', '.avi', '.mov', '.wmv']
+subtitle_extensions = ['.ass', '.srt', '.sub', '.ssa', '.txt']
+
+def match_episode(filename):
+    # 正则匹配
+    episode_pattern = re.compile(
+        r'[Ee]pisode\s*(\d+)|'    # 匹配 "Episode xx"
+        r'[Ee](\d+)|'             # 匹配 "Exx"
+        r'[-\s](\d+)[\s\.\-\(\)]|' # 匹配 " - xx " 或 " xx. "
+        r'第(\d+)話|'              # 匹配 "第xx話"
+        r'第(\d+)话|'              # 匹配 "第xx话"
+        r'\[(\d+)\]|'             # 匹配 "[xx]"
+        r'\s(\d+)\s'              # 匹配 " xx "
+    )
+    match = episode_pattern.search(filename)
+    if match:
+        return next((m for m in match.groups() if m is not None), None)
+    return None
+
+# 检测语言tag
+def detect_language_tag(filename):
+    if '.sc' in filename:
+        return '.sc'
+    elif '.tc' in filename:
+        return '.tc'
+    elif '.chs' in filename:
+        return '.chs'
+    elif '.cht' in filename:
+        return '.cht'
+    elif '.jpn' in filename:
+        return '.jpn'
+    elif '.cht&jpn' in filename: 
+        return '.cht&jpn'	
+    elif '.chs&jpn' in filename:
+        return '.chs&jpn'	
+    return ''
+
+def rename_subtitles(directory=os.getcwd()):
+    # 字幕文件重命名
+    files = os.listdir(directory)
+    videos = [f for f in files if any(f.endswith(ext) for ext in video_extensions)]
+    subtitles = [f for f in files if any(f.endswith(ext) for ext in subtitle_extensions)]
+    renamed_files = []
+
+    if not videos:
+        print("错误：没有找到视频文件")
+    if not subtitles:
+        print("错误：没有找到字幕文件")
+
+    for subtitle in subtitles:
+        episode_number = match_episode(subtitle)
+        lang_tag = detect_language_tag(subtitle)
+        if not episode_number:
+            print(f"错误：无法从字幕文件名称 '{subtitle}' 中匹配集数")
+            continue
+        matched_videos = [v for v in videos if episode_number in match_episode(v)]
+        if not matched_videos:
+            print(f"错误：没有找到与字幕 '{subtitle}' 集数 {episode_number} 匹配的视频文件")
+            continue
+        video_name, video_ext = os.path.splitext(matched_videos[0])
+        subtitle_name, subtitle_ext = os.path.splitext(subtitle)
+        new_subtitle_name = f"{video_name}{lang_tag}{subtitle_ext}"
+        try:
+            os.rename(os.path.join(directory, subtitle), os.path.join(directory, new_subtitle_name))
+            renamed_files.append((os.path.join(directory, new_subtitle_name), os.path.join(directory, subtitle)))
+        except Exception as e:
+            print(f"错误：无法重命名文件 '{subtitle}' 到 '{new_subtitle_name}'，失败原因：{e}")
+    return renamed_files
+
+# 撤销操作，恢复文件名
+def undo_rename(renamed_files):
+    for new_name, old_name in renamed_files:
+        try:
+            os.rename(new_name, old_name)
+        except Exception as e:
+            print(f"错误：无法将 '{new_name}' 撤销到 '{old_name}'，失败原因：{e}")
+
+# 主界面
+def main():
+    print("Subtitle Renamer CLI")
+    print("1. 重命名字幕文件")
+    print("2. 撤销本次操作")
+    last_renamed_files = []
+    while True:
+        choice = input("请输入1 或 2 : ")
+        if choice == '1':
+            renamed_files = rename_subtitles()
+            if renamed_files:
+                last_renamed_files = renamed_files
+                print(f"Completed.  {len(renamed_files)} 个文件受影响")
+            else:
+                print("没有字幕文件名称被更改")
+        elif choice == '2':
+            if last_renamed_files:
+                undo_rename(last_renamed_files)
+                print("已撤销操作")
+                last_renamed_files = []
+            else:
+                print("没有可撤销的重命名历史")
+        else:
+            print("无效输入，请注意输入提示")
+
+if __name__ == "__main__":
+    main()
