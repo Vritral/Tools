@@ -18,10 +18,11 @@ def match_episode(filename):
         r'第(\d+)話|'              # 匹配 "第xx話"
         r'第(\d+)话|'              # 匹配 "第xx话"
         r'\[(\d+)\]|'             # 匹配 "[xx]"
-        r'\s(\d+)\s'              # 匹配 " xx "
+        r'\s(\d+)\s|'              # 匹配 " xx "
         r'S(\d+)E(\d+)|'          # 匹配 "SxxExx"
         r'season\s*(\d+)\s*episode\s*(\d+)|'  # 匹配 "season xx episode xx"
-        r'(\d+)\s*x\s*(\d+)'      # 匹配 "1xxx"
+        r'^([0-9]+)[^\d]|'             # 匹配单纯数字
+        r'(\d+)\s*x\s*(\d+)|'      # 匹配 "1xxx"
         r'Part\s*(\d+)|'          # 匹配 "Part xx"
         r'[\(\[\{](\d+)[\)\]\}]'  # 匹配括号 "(xx)", "[xx]", "{xx}"
     )
