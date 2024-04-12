@@ -12,6 +12,7 @@ def match_episode(filename):
         r'\[([0-9]+)(?:v[0-9]+)?\]|'
         r'[Ee]pisode\s*(\d+)|'    # 匹配 "Episode xx"
         r'[Ee]p_(\d+)|'           # 匹配 "Ep_xx"
+        r'[Ee][Pp]([0-9]{2})|'    # 匹配 "EPxx"
         r'[Ee](\d+)|'             # 匹配 "Exx"
         r'[-\s](\d+)[\s\.\-\(\)]|'# 匹配 " - xx " 或 " xx. "
         r'第(\d+)話|'              # 匹配 "第xx話"
