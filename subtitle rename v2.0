@@ -25,7 +25,8 @@ def match_episode(filename):
         r'(\d+)\s*x\s*(\d+)|'      # 匹配 "1xxx"
         r'Part\s*(\d+)|'          # 匹配 "Part xx"
         r'[\(\[\{](\d+)[\)\]\}]|'  # 匹配括号 "(xx)", "[xx]", "{xx}"
-        r'[\u4e00-\u9fa5]+(\d{1,2})' # 匹配"作品名xx"
+        r'[\u4e00-\u9fa5]+(\d{1,2})|'  # 匹配"作品名xx"
+        r'\.(\d+)\.'                 # 匹配".xx."
     )
     match = episode_pattern.search(filename)
     if match:
